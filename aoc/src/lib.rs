@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::collections::{VecDeque};
 use std::fs;
 
 pub fn day1() {
@@ -158,6 +158,10 @@ fn process_text_day03(contents: &str) {
         epsilon_dec,
         epsilon_dec * gamma_dec
     );
+
+
+    // call for pt2
+    process_text_day03_pt2(contents);
 }
 
 fn join_vec_to_string(vector: &Vec<i32>) -> String {
@@ -173,3 +177,63 @@ fn binary_to_number(binstr: &str) -> i32 {
     let intval = isize::from_str_radix(binstr, 2).unwrap() as i32;
     return intval;
 }
+
+pub fn process_text_day03_pt2(contents: &str) { 
+    let mut most_common_vec: Vec<String> = Vec::new();
+    let mut least_common_vec: Vec<String> = Vec::new();
+    let mut oxygen_level: i32 = 0;
+    let mut co2_level: i32 = 0;
+
+    // populate the vectors
+    for line in contents.lines() {
+        most_common_vec.push(line.to_string());
+        least_common_vec.push(line.to_string());
+    }
+
+    // Process said vectors
+    for i in 0..most_common_vec[0].len(){
+        let most_common_number = get_most_common_number(&most_common_vec, i);
+        let most_common_number_2 = get_most_common_number(&least_common_vec, i);
+        let mut new_most_common_vec: Vec<String> = Vec::new();
+        let mut new_least_common_vec: Vec<String> = Vec::new();
+
+        for entry in most_common_vec {
+            if entry.chars().nth(i.try_into().unwrap()).unwrap().to_digit(10).unwrap() as f64 == most_common_number {
+                new_most_common_vec.push(entry);
+            }
+        }
+        for entry in least_common_vec {
+            if entry.chars().nth(i.try_into().unwrap()).unwrap().to_digit(10).unwrap() as f64 != most_common_number_2 {
+                new_least_common_vec.push(entry);
+            }
+        }
+        
+        // return or keep the vector if len == 1
+        most_common_vec = new_most_common_vec;
+        least_common_vec = new_least_common_vec;
+
+        if most_common_vec.len() == 1 {
+            oxygen_level = binary_to_number(&most_common_vec[0]);
+        }
+        if least_common_vec.len() == 1 {
+            co2_level = binary_to_number(&least_common_vec[0]);
+        }
+            
+    }
+    println!("Day03: The oxygen level is {}, the CO2 {}, The final output is {}", oxygen_level, co2_level, oxygen_level*co2_level);
+}
+
+fn get_most_common_number(readings_vector: &Vec<String>, index: usize) -> f64 {
+    let mut average: f64 = 0f64;
+    let mut line_count: f64 = 0f64;
+    for line in readings_vector{
+        line_count += 1f64;
+        average += line.chars().nth(index).unwrap().to_digit(10).unwrap() as f64;
+    }
+    let most_common = if average/line_count >= 0.5f64 {
+        1f64
+    } else {
+        0f64
+    }; 
+    return most_common;
+} 
